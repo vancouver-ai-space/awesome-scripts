@@ -10,14 +10,17 @@ pip install -r requirements.txt
 
 ## Run
 
+### Main App:
 ```python
 python main.py -d data/ -o results/
 ```
 
+### Flask App:
 ```python
 python app.py
 ```
 
+### Gradio App:
 ```python
 python app_gradio.py
 ```
