@@ -10,7 +10,6 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
-            // "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"
         }
     ]
 }
