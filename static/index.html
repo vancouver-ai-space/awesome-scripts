@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Well-being Chatbot</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+        }
+        .chat-container {
+            width: 350px;
+            height: 600px;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            background-color: #4dd0e1;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .message {
+            max-width: 80%;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .bot-message {
+            background-color: #e0f7fa;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        .user-message {
+            background-color: #4dd0e1;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            margin-left: auto;
+        }
+        .chat-input {
+            display: flex;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        #user-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+        }
+        #send-button {
+            background-color: #4dd0e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #send-button:hover {
+            background-color: #26c6da;
+        }
+        .user-info-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .user-info-input {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        .user-info-input input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .user-info-input label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="user-info-container">
+        <h3>Your Information</h3>
+        <div class="user-info-input">
+            <label for="user-age">Age:</label>
+            <input type="number" id="user-age" placeholder="Enter your age">
+        </div>
+        <div class="user-info-input">
+            <label for="user-location">Location:</label>
+            <input type="text" id="user-location" placeholder="Enter your location">
+        </div>
+        <div class="user-info-input">
+            <label for="user-occupation">Occupation:</label>
+            <input type="text" id="user-occupation" placeholder="Enter your occupation">
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">Well-being Chatbot</div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        async function addMessage(message, isUser = false) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isUser ? 'user-message' : 'bot-message');
+            messageElement.innerHTML = message.replace(/\n/g, '<br>');
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function botReply(userMessage) {
+            try {
+                const userInfo = {
+                    age: document.getElementById('user-age').value || '28',
+                    location: document.getElementById('user-location').value || 'Toronto, Canada',
+                    occupation: document.getElementById('user-occupation').value || 'Software Developer'
+                };
+
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: userMessage,
+                        userInfo: userInfo
+                    })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    setTimeout(() => addMessage(data.response), 500);
+                } else {
+                    setTimeout(() => addMessage("Sorry, I encountered an error. Please try again."), 500);
+                }
+            } catch (error) {
+                setTimeout(() => addMessage("Sorry, I encountered an error. Please try again."), 500);
+            }
+        }
+
+        async function handleUserInput() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                userInput.value = '';
+                await botReply(message);
+            }
+        }
+
+        sendButton.addEventListener('click', handleUserInput);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleUserInput();
+            }
+        });
+
+        // Initial bot message
+        addMessage("Hello! I'm your well-being assistant. How can I help you today?");
+    </script>
+</body>
+</html>

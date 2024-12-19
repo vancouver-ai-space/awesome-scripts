@@ -14,6 +14,15 @@ pip install -r requirements.txt
 python main.py -d data/ -o results/
 ```
 
+```python
+python app.py
+```
+
+```python
+python app_gradio.py
+```
+
+
 ## Overview for the quiz generation
 
 This project is a simple implementation of a quiz generation system using a language model. The system takes an input text and generates a quiz based on the text. The quiz is then compared to an expected output to evaluate the performance of the system.
